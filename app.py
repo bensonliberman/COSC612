@@ -81,8 +81,8 @@ def profilePage():
         cursor.execute("SELECT * FROM Profile WHERE tuID=?", (id))
         result = cursor.fetchall()[0]
     userMajor = result[1]
-    userClubs = result[2]
-    userGradYear = result[3]
+    userGradYear = result[2]
+    userClubs = result[3]
     return render_template('myProfile.html', userMajor = userMajor, userClubs= userClubs, userGradYear=userGradYear, pageType=pageType )
 
 @app.route('/MyWorkRecord')
@@ -104,9 +104,23 @@ def homepage():
     return render_template('homepageLayout.html', pageType = pageType, calMonth=calMonth)
 
 
-@app.route('/BecomeATutor')
+@app.route('/BecomeATutor', methods=['GET', 'POST'])
 def becomeATutorPage(): 
     pageType = backend.userClass
+    if request.method == 'POST':
+        tuID = request.form['tuID']
+        first_name = request.form['name'].split(' ')[0]
+        last_name = request.form['name'].split(' ')[-1]
+        email = request.form['email']
+        subject = request.form['subject']
+        location = request.form['location']
+        with sqlite3.connect('System_Data.db') as conn:
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO Tutor_Application values(?, ?, ?, ?, ?)",
+                           (tuID, first_name, last_name, email, subject))
+            cursor.execute("INSERT INTO Tutor_Account values(?, ?, ?)",
+                           (tuID, subject, location))
+            conn.commit()
     return render_template('becomeATutor.html', pageType=pageType)
 
 @app.route('/MyCalendar')
