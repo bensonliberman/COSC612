@@ -97,13 +97,6 @@ def workRecordPage():
 
     return render_template('/workRecord.html', pageType=pageType, id=id, hours=hours)
 
-@app.route('/Home')
-def homepage():
-    pageType = backend.userClass
-    calMonth = backend.month
-    return render_template('homepageLayout.html', pageType = pageType, calMonth=calMonth)
-
-
 @app.route('/BecomeATutor', methods=['GET', 'POST'])
 def becomeATutorPage(): 
     pageType = backend.userClass
@@ -123,6 +116,33 @@ def becomeATutorPage():
             conn.commit()
     return render_template('becomeATutor.html', pageType=pageType)
 
+@app.route('/TutoringApplications',  methods=['GET', 'POST'])
+def viewTutAppsPage():
+    pageType = backend.userClass
+    with sqlite3.connect('System_Data.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT first_name,last_name,email,tuID FROM Tutor_Application")
+        result = cursor.fetchall()[0]
+        fullname = [result[0], result[1]]
+        name = " ".join(fullname)
+
+    return render_template('viewTutApps.html', pageType=pageType, name=name)
+
+@app.route('/ApplicationDetail')
+def viewAppDetailsPage():
+    pageType = backend.userClass
+    with sqlite3.connect('System_Data.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT first_name,last_name,email,tuID FROM Tutor_Application")
+        result = cursor.fetchall()[0]
+        fullname = [result[0], result[1]]
+        email = result[2]
+        tuID = result[3]
+        name = " ".join(fullname)
+    return render_template('tutAppDetail.html', pageType=pageType, applicantName=name,
+                           applicantID=tuID, applicantRecLetter='applicantRecLetter',
+                           applicantEmail=email)
+
 @app.route('/MyCalendar')
 def calendarPage(): 
     pageType = backend.userClass
@@ -135,21 +155,6 @@ def weeklyCalendarPage():
     pageType = backend.userClass
     calMonth = backend.month
     return render_template('weeklyCalendar.html', pageType=pageType, calMonth = calMonth)
-
-@app.route('/TutoringApplications')
-def viewTutAppsPage(): 
-    pageType = backend.userClass
-    return render_template('viewTutApps.html', pageType=pageType)
- 
-@app.route('/ApplicationDetail')
-def viewAppDetailsPage():
-    pageType = backend.userClass
-    applicantName = backend.appName
-    applicantID = backend.appid
-    applicantRecLetter = backend.appRec
-    applicantEmail = backend.email
-    return render_template('tutAppDetail.html', pageType = pageType, applicantName = applicantName,
-                           applicantID = applicantID, applicantRecLetter = applicantRecLetter,applicantEmail = applicantEmail)
 
 @app.route('/SystemInfo')
 def viewSystemInfoPage(): 
@@ -214,6 +219,13 @@ def manageFacilPage():
     pageType = backend.userClass
     
     return render_template('/manageFacil.html', pageType=pageType)
+
+@app.route('/Home')
+def homepage():
+    pageType = backend.userClass
+    calMonth = backend.month
+    return render_template('homepageLayout.html', pageType = pageType, calMonth=calMonth)
+
 
 if __name__ == '__main__':
     HOST = os.environ.get('SERVER_HOST', 'localhost')
